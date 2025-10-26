@@ -13,11 +13,12 @@ import ListItem from '@tiptap/extension-list-item'
 import Blockquote from '@tiptap/extension-blockquote'
 import CodeBlock from '@tiptap/extension-code-block'
 import * as Y from 'yjs'
+import { undo as yUndo, redo as yRedo } from 'y-prosemirror'
 import { WebsocketProvider } from 'y-websocket'
 import Collaboration from '@tiptap/extension-collaboration'
 // Removed CollaborationCursor to avoid runtime error when awareness is undefined
 import { loadDocument, saveDocument } from './api.js';
-import { WS_URL, URLS } from './config.js';
+import { WS_URL } from './config.js';
 
 function App() {
   const [roomId] = useState('doc-1')
@@ -87,121 +88,36 @@ function App() {
     }
   }, [editor, provider, roomId])
 
+  const btn: React.CSSProperties = {
+    background: '#222',
+    color: '#fff',
+    border: '1px solid #333',
+    padding: '8px 12px',
+    borderRadius: 6,
+    cursor: 'pointer'
+  }
+
   return (
-    <div style={{ 
-      height: '100vh', 
-      boxSizing: 'border-box', 
-      padding: '40px 20px',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      maxWidth: '1200px',
-      margin: '0 auto'
-    }}>
-      {/* Header */}
-      <h1 style={{ 
-        margin: '0 0 20px 0',
-        fontSize: '4.5em',
-        background: 'linear-gradient(135deg, #ffffff 0%, #ffd89b 50%, #ffffff 100%)',
-        WebkitBackgroundClip: 'text',
-        WebkitTextFillColor: 'transparent',
-        backgroundClip: 'text',
-        fontWeight: '800',
-        letterSpacing: '-3px',
-        textAlign: 'center',
-        textShadow: '0 8px 32px rgba(255, 255, 255, 0.5)',
-        filter: 'drop-shadow(0 4px 20px rgba(0,0,0,0.3))',
-        animation: 'titleGlow 3s ease-in-out infinite'
-      }}>✨ Document Editor</h1>
-
-      {/* Access URLs Display */}
-      <div style={{
-        background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.2) 100%)',
-        backdropFilter: 'blur(20px)',
-        borderRadius: '16px',
-        padding: '16px 24px',
-        marginBottom: '24px',
-        border: '2px solid rgba(255, 255, 255, 0.4)',
-        width: '100%',
-        boxShadow: '0 8px 25px rgba(0, 0, 0, 0.1)'
-      }}>
-        <div style={{ display: 'flex', gap: '32px', justifyContent: 'center', flexWrap: 'wrap', fontSize: '0.9em', color: '#fff', fontWeight: '600' }}>
-          <div>
-            <span style={{ opacity: 0.8 }}>💻 PC:</span> <code style={{ background: 'rgba(0,0,0,0.2)', padding: '4px 12px', borderRadius: '8px', marginLeft: '8px' }}>{URLS.PC.frontend}</code>
-          </div>
-          <div>
-            <span style={{ opacity: 0.8 }}>📱 Phone:</span> <code style={{ background: 'rgba(0,0,0,0.2)', padding: '4px 12px', borderRadius: '8px', marginLeft: '8px' }}>{URLS.PHONE.frontend}</code>
-          </div>
-        </div>
+    <div style={{ background: '#000', minHeight: '100vh', padding: '24px', color: '#fff' }}>
+      <h2 style={{ margin: 0, marginBottom: '16px', color: '#fff', fontWeight: 700 }}>DocumentEditor</h2>
+      <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
+        <button style={btn} disabled={!editor} onClick={() => editor?.chain().focus().toggleBold().run()}>Bold</button>
+        <button style={btn} disabled={!editor} onClick={() => editor?.chain().focus().toggleItalic().run()}>Italic</button>
+        <button style={btn} disabled={!editor} onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}>H2</button>
+        <button style={btn} disabled={!editor} onClick={() => editor?.chain().focus().toggleUnderline().run()}>Underline</button>
+        <button style={btn} disabled={!editor} onClick={() => editor?.chain().focus().setTextAlign('left').run()}>Left</button>
+        <button style={btn} disabled={!editor} onClick={() => editor?.chain().focus().setTextAlign('center').run()}>Center</button>
+        <button style={btn} disabled={!editor} onClick={() => editor?.chain().focus().setTextAlign('right').run()}>Right</button>
+        <button style={btn} disabled={!editor} onClick={() => editor?.chain().focus().toggleBulletList().run()}>Bullets</button>
+        <button style={btn} disabled={!editor} onClick={() => editor?.chain().focus().toggleOrderedList().run()}>Numbers</button>
+        <button style={btn} disabled={!editor} onClick={() => editor?.chain().focus().toggleBlockquote().run()}>Quote</button>
+        <button style={btn} disabled={!editor} onClick={() => editor?.chain().focus().toggleCodeBlock().run()}>Code</button>
+        <button style={btn} disabled={!editor} onClick={() => editor?.chain().focus().unsetAllMarks().clearNodes().run()}>Clear</button>
+        <button style={btn} disabled={!editor} onClick={() => { if (!editor) return; if (provider) { yUndo(editor.view.state); editor.view.focus(); } else { editor.chain().focus().undo().run(); } }}>Undo</button>
+        <button style={btn} disabled={!editor} onClick={() => { if (!editor) return; if (provider) { yRedo(editor.view.state); editor.view.focus(); } else { editor.chain().focus().redo().run(); } }}>Redo</button>
       </div>
-
-      {/* Toolbar */}
-      <div style={{
-        background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.15) 100%)',
-        backdropFilter: 'blur(30px)',
-        borderRadius: '24px',
-        padding: '20px 28px',
-        marginBottom: '28px',
-        boxShadow: '0 15px 45px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.3) inset',
-        border: '2px solid rgba(255, 255, 255, 0.4)',
-        width: '100%',
-        transition: 'all 0.3s ease'
-      }}>
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center' }}>
-          <button type="button" disabled={!editor} onMouseDown={(e)=>{e.preventDefault(); editor?.chain().focus().toggleBold().run();}} title="Bold">𝐁</button>
-          <button type="button" disabled={!editor} onMouseDown={(e)=>{e.preventDefault(); editor?.chain().focus().toggleItalic().run();}} title="Italic">𝐼</button>
-          <button type="button" disabled={!editor} onMouseDown={(e)=>{e.preventDefault(); editor?.chain().focus().toggleUnderline().run();}} title="Underline">U̲</button>
-          <button type="button" disabled={!editor} onMouseDown={(e)=>{e.preventDefault(); editor?.chain().focus().toggleHeading({ level: 2 }).run();}} title="Heading 2">H₂</button>
-          <button type="button" disabled={!editor} onMouseDown={(e)=>{e.preventDefault(); editor?.chain().focus().setTextAlign('left').run();}} title="Align Left">≡</button>
-          <button type="button" disabled={!editor} onMouseDown={(e)=>{e.preventDefault(); editor?.chain().focus().setTextAlign('center').run();}} title="Align Center">☰</button>
-          <button type="button" disabled={!editor} onMouseDown={(e)=>{e.preventDefault(); editor?.chain().focus().setTextAlign('right').run();}} title="Align Right">≣</button>
-          <button type="button" disabled={!editor} onMouseDown={(e)=>{e.preventDefault(); editor?.chain().focus().toggleBulletList().run();}} title="Bullet List">•</button>
-          <button type="button" disabled={!editor} onMouseDown={(e)=>{e.preventDefault(); editor?.chain().focus().toggleOrderedList().run();}} title="Numbered List">1.</button>
-          <button type="button" disabled={!editor} onMouseDown={(e)=>{e.preventDefault(); editor?.chain().focus().toggleBlockquote().run();}} title="Quote">❝</button>
-          <button type="button" disabled={!editor} onMouseDown={(e)=>{e.preventDefault(); editor?.chain().focus().toggleCodeBlock().run();}} title="Code Block">⟨/⟩</button>
-          <input type="color" disabled={!editor} onChange={(e) => editor?.chain().focus().setColor(e.target.value).run()} title="Text color" />
-          <button type="button" disabled={!editor} onMouseDown={(e)=>{e.preventDefault(); editor?.chain().focus().undo().run();}} title="Undo">↶</button>
-          <button type="button" disabled={!editor} onMouseDown={(e)=>{e.preventDefault(); editor?.chain().focus().redo().run();}} title="Redo">↷</button>
-        </div>
-      </div>
-
-      
-      
-      {/* Editor Container */}
-      <div style={{ flex: 1, overflow: 'hidden', width: '100%' }}>
-        {editor ? (
-          <EditorContent editor={editor} />
-        ) : (
-          <div style={{
-            width: '100%',
-            height: '100%',
-            background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.85) 100%)',
-            backdropFilter: 'blur(30px)',
-            borderRadius: '28px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '1.3em',
-            color: '#667eea',
-            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.5) inset',
-            border: '2px solid rgba(255, 255, 255, 0.4)'
-          }}>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ 
-                fontSize: '4em', 
-                marginBottom: '20px',
-                animation: 'bounce 2s ease-in-out infinite'
-              }}>📝</div>
-              <div style={{
-                fontWeight: '600',
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text'
-              }}>Loading editor...</div>
-            </div>
-          </div>
-        )}
+      <div style={{ background: '#fff', color: '#000', minHeight: '75vh', borderRadius: '4px', padding: '24px', maxWidth: '1100px' }}>
+        {editor ? (<EditorContent editor={editor} />) : null}
       </div>
     </div>
   )
