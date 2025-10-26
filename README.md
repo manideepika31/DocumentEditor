@@ -248,17 +248,7 @@ DocumentEditor/
   - `npm --prefix client run dev`
   - `npm --prefix client run build && npm --prefix client run preview`
 
-## Testing (suggested)
-
-- Unit: TipTap commands and reducers (Vitest/Jest)
-- API: Supertest for `/api/documents/:key`
-- E2E: Playwright/Cypress to validate autosave + realtime with two browsers
-
-## Performance Notes
-
-- TipTap document size kept lean; autosave interval is 3s (tunable)
-- Rollup code‑splitting configured in `vite.config.ts`
-- Consider CDN for static assets when hosting at scale
+<!-- Testing and Performance sections removed per request -->
 
 ## Accessibility
 
@@ -273,3 +263,8 @@ DocumentEditor/
 - Presence cursors and user colors
 - Version history and restore
 
+---
+
+Thank you for viewing! Feel free to contact me.
+
+GitHub: @manideepika31
