@@ -31,6 +31,16 @@ React (TipTap) ——REST——> Express ————> MongoDB Atlas
            └—WebSocket—> y-websocket
 ```
 
+### Diagram
+
+```mermaid
+flowchart LR
+  A[React + Vite + TipTap] -- Yjs updates --> B((y-websocket))
+  B --> A
+  A -- REST /api --> C[Express API]
+  C --> D[(MongoDB Atlas)]
+```
+
 ### Components
 
 - **Client (React + TipTap)**
