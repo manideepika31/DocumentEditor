@@ -98,6 +98,16 @@ flowchart LR
     - `VITE_WS_URL  = wss://<your-render-app>.onrender.com`
   - Build and deploy as a static site
 
+### Deployment Diagram
+
+```mermaid
+flowchart LR
+  U[User Browser] --> F[Frontend (Netlify/Vercel)]
+  F -->|VITE_API_URL| S[Backend (Render)]
+  F -->|VITE_WS_URL| S
+  S --> M[(MongoDB Atlas)]
+```
+
 ### Environment Variables
 
 - Server (Render or local `.env`)
