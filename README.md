@@ -225,28 +225,7 @@ DocumentEditor/
   - Client opens WS to `WS_URL` → joins room `doc-1`
   - Local changes broadcast as CRDT updates → other peers merge → editor reflects
 
-## Configuration Matrix
-
-- Localhost (default)
-  - API: `http://localhost:4000`
-  - WS:  `ws://localhost:4000`
-
-- Hosted (Render + Netlify/Vercel)
-  - Set in frontend env at build time:
-    - `VITE_API_URL=https://<render-app>.onrender.com`
-    - `VITE_WS_URL=wss://<render-app>.onrender.com`
-
-## Scripts
-
-- Server
-  - `npm --prefix server install`
-  - `npm --prefix server run dev`
-  - `npm --prefix server run build && npm --prefix server run start`
-
-- Client
-  - `npm --prefix client install`
-  - `npm --prefix client run dev`
-  - `npm --prefix client run build && npm --prefix client run preview`
+<!-- Configuration Matrix and Scripts sections removed per request -->
 
 <!-- Testing and Performance sections removed per request -->
 
@@ -267,4 +246,4 @@ DocumentEditor/
 
 Thank you for viewing! Feel free to contact me.
 
-GitHub: @manideepika31
+GitHub: [@manideepika31](https://github.com/manideepika31)
